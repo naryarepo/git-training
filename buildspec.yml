@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+ pre_build:
+   commands:
+     - echo Logging in to Amazon ECR...
+     - $(aws ecr get-login --no-include-email --region eu-west-2 )
+ build:
+   commands:
+    - echo Build started on `date`
+    - echo Building the Docker image...
+    - docker build -t nginxdemo1:latest .
+    - docker tag nginxdemo1 259024176822.dkr.ecr.eu-west-2.amazonaws.com/nginxdemo1
+ post_build:
+   commands:
+    - echo Build completed on `date`
+    - echo Pushing the Docker images...
+    - docker push 259024176822.dkr.ecr.eu-west-2.amazonaws.com/nginxdemo1:latest 
+    - echo Writing definitions file...
+    - printf '[{"name":"docker-fargate-taskdefinition","imageUri":"%s"}]' 259024176822.dkr.ecr.eu-west-2.amazonaws.com/nginxdemo1:latest > imagedefinitions.json
+artifacts:
+ files: imagedefinitions.json
+
